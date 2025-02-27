@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Balon Patlatma - Çarpım Tablosu</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <style>
+        :root {
+            --primary-color: #8B5CF6;       // Canlı mor
+            --secondary-color: #06D6A0;    // Turkuaz
+            --accent-color: #FFD166;       // Sarı-turuncu
+            --success-color: #06D6A0;       // Turkuaz
+            --error-color: #FF6B6B;        // Açık kırmızı
+            --background: linear-gradient(135deg, #8B5CF6 0%, #06D6A0 100%);
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--background);
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .container {
+            text-align: center;
+            padding: 2rem;
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #1e293b;
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+            letter-spacing: -0.025em;
+        }
+
+        .number-select {
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin: 2rem 0;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+        }
+
+        button {
+            padding: 0.75rem 1.5rem;
+            margin: 0.5rem;
+            font-size: 1rem;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 0.75rem;
+            background: var(--primary-color);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 6px -1px rgba(139, 92, 246, 0.3);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            background: var(--secondary-color);
+            box-shadow: 0 10px 15px -3px rgba(6, 214, 160, 0.3);
+        }
+
+        .game-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 40px;
+            max-width: 800px;
+            margin: 20px;
+            min-height: 400px;
+        }
+
+        .balloon {
+            width: 160px;
+            height: 200px;
+            background: radial-gradient(circle at 30% 30%, #8B5CF6, #7C3AED);
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            box-shadow: 0 25px 50px -12px rgba(139, 92, 246, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 600;
+            position: relative;
+            transition: all 0.3s;
+        }
+
+        .balloon::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 12px;
+            background: #ff758c;
+        }
+
+        .options {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 1.5rem;
+            width: 100%;
+            max-width: 600px;
+            margin-top: 2rem;
+        }
+
+        .option {
+            padding: 1.5rem;
+            font-size: 1.25rem;
+            background: rgba(255, 255, 255, 0.95) !important;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+            cursor: pointer;
+            border: 2px solid var(--primary-color);
+            font-weight: 500;
+            color: #2D3748;
+        }
+
+        .option:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            border-color: var(--primary-color);
+        }
+
+        .option.correct {
+            background: linear-gradient(135deg, #06D6A0, #059669) !important;
+            color: white;
+            box-shadow: 0 10px 15px -3px rgba(6, 214, 160, 0.3);
+        }
+
+        .option.wrong {
+            background: linear-gradient(135deg, #FF6B6B, #EF4444) !important;
+            color: white;
+            box-shadow: 0 10px 15px -3px rgba(255, 107, 107, 0.3);
+        }
+
+        .score {
+            font-size: 1.5rem;
+            color: #1e293b;
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 0.75rem 2rem;
+            border-radius: 2rem;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border: 2px solid var(--secondary-color);
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.75rem;
+                padding: 0 1rem;
+            }
+            
+            .number-select {
+                margin: 1rem 0;
+                padding: 1rem;
+            }
+            
+            button {
+                padding: 0.8rem 1.2rem;
+                font-size: 0.9rem;
+                margin: 0.3rem;
+            }
+            
+            .balloon {
+                width: 120px;
+                height: 150px;
+                font-size: 1.2rem;
+            }
+            
+            .options {
+                gap: 1rem;
+                padding: 0 1rem;
+            }
+            
+            .option {
+                padding: 1.2rem;
+                font-size: 1.1rem;
+            }
+        }
+
+        @media (max-width: 380px) and (orientation: portrait) {
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            .score {
+                font-size: 1.2rem;
+                padding: 0.5rem 1.5rem;
+            }
+            
+            .option {
+                padding: 1rem;
+                font-size: 1rem;
+            }
+        }
+        
+        @supports (-webkit-touch-callout: none) {
+            .balloon {
+                -webkit-transform: translateZ(0);
+            }
+            .option {
+                -webkit-overflow-scrolling: touch;
+            }
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <h1>🎈 Balon Patlatma - Çarpım Tablosu 🎈</h1>
+        
+        <div class="number-select">
+            <p>Çalışmak istediğin sayıyı seç:</p>
+            <button onclick="startGame(1)">1</button>
+            <button onclick="startGame(2)">2</button>
+            <button onclick="startGame(3)">3</button>
+            <button onclick="startGame(4)">4</button>
+            <button onclick="startGame(5)">5</button>
+        </div>
+
+        <div class="score">Puan: <span id="score">0</span></div>
+        <div id="gameArea" class="game-area"></div>
+    </div>
+
+    <script>
+        let score = 0;
+        let currentNumber;
+
+        function startGame(num) {
+            currentNumber = num;
+            score = 0;
+            document.getElementById('score').textContent = score;
+            createQuestion();
+        }
+
+        function createQuestion() {
+            const gameArea = document.getElementById('gameArea');
+            gameArea.innerHTML = '';
+
+            const i = Math.floor(Math.random() * 10) + 1;
+            const correctAnswer = currentNumber * i;
+
+            // Balon içinde soru
+            const balloon = document.createElement('div');
+            balloon.className = 'balloon';
+            balloon.innerHTML = `${currentNumber} × ${i} = ?`;
+            gameArea.appendChild(balloon);
+
+            // Cevap seçenekleri
+            const options = document.createElement('div');
+            options.className = 'options';
+
+            // Doğru cevap ve 3 yanlış cevap oluştur
+            const answers = [correctAnswer];
+            while (answers.length < 4) {
+                const wrongAnswer = correctAnswer + Math.floor(Math.random() * 10) - 5;
+                if (wrongAnswer !== correctAnswer && !answers.includes(wrongAnswer) && wrongAnswer > 0) {
+                    answers.push(wrongAnswer);
+                }
+            }
+
+            // Cevapları karıştır
+            answers.sort(() => Math.random() - 0.5);
+
+            answers.forEach(answer => {
+                const option = document.createElement('div');
+                option.className = 'option';
+                option.textContent = answer;
+                option.onclick = () => checkAnswer(answer, correctAnswer, balloon);
+                options.appendChild(option);
+            });
+
+            gameArea.appendChild(options);
+        }
+
+        function checkAnswer(selectedAnswer, correctAnswer, balloon) {
+            const options = document.querySelectorAll('.option');
+            
+            options.forEach(option => {
+                const answer = parseInt(option.textContent);
+                if (answer === correctAnswer) {
+                    option.classList.add('correct');
+                } else if (answer === selectedAnswer) {
+                    option.classList.add('wrong');
+                }
+                
+                option.style.pointerEvents = 'none'; // Tekrar tıklanmasını engelle
+            });
+
+            if (selectedAnswer === correctAnswer) {
+                score += 10;
+                document.getElementById('score').textContent = score;
+                
+                balloon.classList.add('pop');
+                createConfetti();
+                
+                setTimeout(() => {
+                    options.forEach(option => {
+                        option.classList.remove('correct', 'wrong');
+                        option.style.pointerEvents = 'auto';
+                    });
+                    createQuestion();
+                }, 1000);
+            } else {
+                balloon.style.backgroundColor = '#ff4444';
+                
+                setTimeout(() => {
+                    options.forEach(option => {
+                        option.classList.remove('correct', 'wrong');
+                        option.style.pointerEvents = 'auto';
+                    });
+                    balloon.style.backgroundColor = '';
+                }, 1500);
+            }
+        }
+
+        function createConfetti() {
+            for (let i = 0; i < 30; i++) {
+                const confetti = document.createElement('div');
+                confetti.style.position = 'fixed';
+                confetti.style.width = '10px';
+                confetti.style.height = '10px';
+                confetti.style.backgroundColor = `hsl(${Math.random() * 360}deg, 100%, 50%)`;
+                confetti.style.left = Math.random() * 100 + 'vw';
+                confetti.style.top = '-10px';
+                confetti.style.borderRadius = '50%';
+                confetti.style.animation = `fall ${Math.random() * 2 + 1}s linear`;
+                document.body.appendChild(confetti);
+
+                setTimeout(() => confetti.remove(), 2000);
+            }
+        }
+
+        // Konfeti animasyonu için CSS
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fall {
+                to {
+                    transform: translateY(100vh) rotate(360deg);
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html> 
