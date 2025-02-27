@@ -81,7 +81,7 @@
         .balloon {
             width: 160px;
             height: 200px;
-            background: radial-gradient(circle at 30% 30%, #8B5CF6, #7C3AED);
+            transition: all 0.3s, background 0.5s ease;
             border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
             box-shadow: 0 25px 50px -12px rgba(139, 92, 246, 0.4);
             display: flex;
@@ -91,7 +91,6 @@
             font-size: 1.5rem;
             font-weight: 600;
             position: relative;
-            transition: all 0.3s;
         }
 
         .balloon::after {
@@ -217,10 +216,18 @@
         }
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <audio id="correctSound" src="data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU7V7A=="></audio>
+    <audio id="wrongSound" src="data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU7V7A=="></audio>
+    <audio id="backgroundMusic" loop>
+        <source src="bg-music.mp3" type="audio/mpeg">
+        Tarayıcınız audio elementini desteklemiyor.
+    </audio>
 </head>
 <body>
     <div class="container">
-        <h1>🎈 Balon Patlatma - Çarpım Tablosu 🎈</h1>
+        <h1>🎈 Balon Patlatma - Çarpım Tablosu 🎈 
+            <button id="musicToggle" onclick="toggleMusic()" style="font-size: 0.6em; vertical-align: middle;">🔊</button>
+        </h1>
         
         <div class="number-select">
             <p>Çalışmak istediğin sayıyı seç:</p>
@@ -239,10 +246,97 @@
         let score = 0;
         let currentNumber;
 
+        // Müzik kontrolü için değişken
+        let isMusicPlaying = false;
+        const backgroundMusic = document.getElementById('backgroundMusic');
+
+        function toggleMusic() {
+            isMusicPlaying = !isMusicPlaying;
+            const musicButton = document.getElementById('musicToggle');
+            
+            if(isMusicPlaying) {
+                backgroundMusic.play();
+                musicButton.innerHTML = '🔊';
+            } else {
+                backgroundMusic.pause();
+                musicButton.innerHTML = '🔇';
+            }
+        }
+
+        // Rastgele renk üretme fonksiyonu
+        function randomColor() {
+            const hue = Math.floor(Math.random() * 360);
+            return `hsl(${hue}deg, 80%, 60%)`;
+        }
+
+        // Ses efektleri için Web Audio API
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playCorrectSound() {
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.type = 'triangle';
+            oscillator.frequency.setValueAtTime(880, audioContext.currentTime);
+            gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.start();
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+            oscillator.stop(audioContext.currentTime + 0.5);
+        }
+
+        function playWrongSound() {
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.type = 'square';
+            oscillator.frequency.setValueAtTime(220, audioContext.currentTime);
+            gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.start();
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+            oscillator.stop(audioContext.currentTime + 0.3);
+        }
+
+        // Sayfa yüklendiğinde müzik ayarlarını yap
+        document.addEventListener('DOMContentLoaded', function() {
+            // Kullanıcı etkileşimi sonrası müziği başlat
+            const startHandler = () => {
+                if(!isMusicPlaying) {
+                    backgroundMusic.play().catch(() => {});
+                    document.removeEventListener('click', startHandler);
+                    document.removeEventListener('touchstart', startHandler);
+                }
+            };
+
+            // İlk tıklamada müziği etkinleştir
+            document.addEventListener('click', startHandler);
+            document.addEventListener('touchstart', startHandler);
+
+            // Müzik ayarlarını yapılandır
+            backgroundMusic.volume = 0.3; // Ses seviyesi %30
+            backgroundMusic.loop = true;
+        });
+
+        // Oyun butonlarını güncelle (müzikle senkronize et)
         function startGame(num) {
             currentNumber = num;
             score = 0;
             document.getElementById('score').textContent = score;
+            
+            // Müzik çalmıyorsa başlat
+            if(!isMusicPlaying) {
+                backgroundMusic.play();
+                isMusicPlaying = true;
+                document.getElementById('musicToggle').innerHTML = '🔊';
+            }
+            
             createQuestion();
         }
 
@@ -257,6 +351,12 @@
             const balloon = document.createElement('div');
             balloon.className = 'balloon';
             balloon.innerHTML = `${currentNumber} × ${i} = ?`;
+            
+            // Rastgele balon rengi
+            const color1 = randomColor();
+            const color2 = randomColor();
+            balloon.style.background = `radial-gradient(circle at 30% 30%, ${color1}, ${color2})`;
+            balloon.style.boxShadow = `0 25px 50px -12px ${color1}66`;
             gameArea.appendChild(balloon);
 
             // Cevap seçenekleri
@@ -306,6 +406,7 @@
                 
                 balloon.classList.add('pop');
                 createConfetti();
+                playCorrectSound();
                 
                 setTimeout(() => {
                     options.forEach(option => {
@@ -316,6 +417,7 @@
                 }, 1000);
             } else {
                 balloon.style.backgroundColor = '#ff4444';
+                playWrongSound();
                 
                 setTimeout(() => {
                     options.forEach(option => {
