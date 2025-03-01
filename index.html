@@ -6,11 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <style>
         :root {
-            --primary-color: #8B5CF6;       // Canlı mor
-            --secondary-color: #06D6A0;    // Turkuaz
-            --accent-color: #FFD166;       // Sarı-turuncu
-            --success-color: #06D6A0;       // Turkuaz
-            --error-color: #FF6B6B;        // Açık kırmızı
+            --primary-color: #8B5CF6;       /* Canlı mor */
+            --secondary-color: #06D6A0;       /* Turkuaz */
+            --accent-color: #FFD166;          /* Sarı-turuncu */
+            --success-color: #06D6A0;         /* Turkuaz */
+            --error-color: #FF6B6B;           /* Açık kırmızı */
             --background: linear-gradient(135deg, #8B5CF6 0%, #06D6A0 100%);
         }
 
@@ -156,6 +156,23 @@
             border: 2px solid var(--secondary-color);
         }
 
+        /* Home butonu stil düzenlemesi */
+        .home-button {
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            border: none;
+            border-radius: 0.75rem;
+            background: var(--accent-color);
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 4px 6px -1px rgba(255, 193, 102, 0.3);
+            transition: all 0.3s;
+        }
+        .home-button:hover {
+            transform: translateY(-2px);
+            background: #FFC107;
+        }
+
         @media (max-width: 768px) {
             h1 {
                 font-size: 1.75rem;
@@ -236,10 +253,18 @@
             <button onclick="startGame(3)">3</button>
             <button onclick="startGame(4)">4</button>
             <button onclick="startGame(5)">5</button>
+            <button onclick="startGame(6)">6</button>
+            <button onclick="startGame(7)">7</button>
+            <button onclick="startGame(8)">8</button>
+            <button onclick="startGame(9)">9</button>
+            <button onclick="startGame(10)">10</button>
         </div>
 
         <div class="score">Puan: <span id="score">0</span></div>
         <div id="gameArea" class="game-area"></div>
+        <div id="homeDiv" style="display: none; margin-top: 20px;">
+            <button class="home-button" onclick="goHome()">🏠 Ana Sayfaya Dön</button>
+        </div>
     </div>
 
     <script>
@@ -338,6 +363,7 @@
             }
             
             createQuestion();
+            document.getElementById('homeDiv').style.display = "block";
         }
 
         function createQuestion() {
@@ -446,6 +472,14 @@
             }
         }
 
+        // Ana sayfaya dönüş fonksiyonu
+        function goHome() {
+            document.getElementById('gameArea').innerHTML = "";
+            document.getElementById('homeDiv').style.display = "none";
+            score = 0;
+            document.getElementById('score').textContent = score;
+        }
+
         // Konfeti animasyonu için CSS
         const style = document.createElement('style');
         style.textContent = `
@@ -458,4 +492,4 @@
         document.head.appendChild(style);
     </script>
 </body>
-</html> 
+</html>
