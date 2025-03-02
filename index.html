@@ -42,7 +42,6 @@
       font-size: 26px;
     }
 
-    /* Mobilde butonlar, soru, vb. daha büyük ve kompakt görünsün */
     @media (max-width: 480px) {
       h1 {
         font-size: 22px;
@@ -60,7 +59,7 @@
       .option-btn {
         font-size: 18px;
         padding: 12px 16px;
-        min-width: 70px; /* Seçenek butonları biraz daha geniş */
+        min-width: 70px;
         margin: 4px;
       }
       .audio-controls {
@@ -72,7 +71,6 @@
       }
     }
 
-    /* Tablet ve üzeri için */
     @media (min-width: 481px) {
       h1 {
         font-size: 26px;
@@ -116,7 +114,7 @@
       text-align: center;
     }
 
-    /* Teşvik Mesajı Animasyonu */
+    /* Teşvik Mesajı Animasyonu (3s görünür, sonra 0.5s fade out) */
     .feedback-animation {
       position: fixed;
       top: 50%;
@@ -127,7 +125,12 @@
       border-radius: 10px;
       font-size: 24px;
       z-index: 1500;
-      animation: fadeOut 3s forwards;
+      text-align: center;       /* Metin ortalansın */
+      width: 80%;              /* Mobilde genişçe bir kutu */
+      max-width: 400px;        /* Çok geniş ekranlarda 400px'e kadar */
+      line-height: 1.4;        /* Satır aralığı arttı */
+      animation: fadeOut 0.5s 3s forwards; 
+      /* 3s gecikme + 0.5s fadeOut = 3.5s toplam */
     }
     .feedback-success {
       border: 2px solid #4caf50;
@@ -655,7 +658,7 @@
       return messages[Math.floor(Math.random() * messages.length)];
     }
 
-    // Teşvik mesajı animasyonunu gösterme fonksiyonu (3 saniye görünme süresi)
+    // Teşvik mesajı animasyonunu gösterme fonksiyonu
     function showFeedbackAnimation(text, type) {
       const feedbackDiv = document.createElement("div");
       feedbackDiv.className =
@@ -663,9 +666,11 @@
         (type === "success" ? "feedback-success" : "feedback-error");
       feedbackDiv.textContent = text;
       document.body.appendChild(feedbackDiv);
-      setTimeout(() => {
+
+      // Animasyon bitince DOM'dan kaldıralım
+      feedbackDiv.addEventListener("animationend", () => {
         feedbackDiv.remove();
-      }, 3000);
+      });
     }
 
     // DOM elementleri
