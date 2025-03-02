@@ -2,494 +2,965 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>Balon Patlatma - Çarpım Tablosu</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Çarpım Tablosu Oyunu</title>
     <style>
-        :root {
-            --primary-color: #8B5CF6;       /* Canlı mor */
-            --secondary-color: #06D6A0;       /* Turkuaz */
-            --accent-color: #FFD166;          /* Sarı-turuncu */
-            --success-color: #06D6A0;         /* Turkuaz */
-            --error-color: #FF6B6B;           /* Açık kırmızı */
-            --background: linear-gradient(135deg, #8B5CF6 0%, #06D6A0 100%);
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
-
+        
         body {
-            font-family: 'Poppins', sans-serif;
-            background: var(--background);
-            min-height: 100vh;
+            font-family: 'Comic Sans MS', 'Chalkboard SE', 'Marker Felt', sans-serif;
+            background-color: #f0f8ff;
             margin: 0;
+            padding: 10px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            -webkit-tap-highlight-color: transparent;
+            min-height: 100vh;
+            overflow-x: hidden;
         }
-
+        
         .container {
-            text-align: center;
-            padding: 2rem;
-            max-width: 1200px;
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            padding: 15px;
             width: 100%;
+            max-width: 500px;
+            text-align: center;
+            margin-bottom: 20px;
         }
-
+        
         h1 {
-            color: #1e293b;
-            font-size: 2.5rem;
-            margin-bottom: 1.5rem;
-            font-weight: 600;
-            letter-spacing: -0.025em;
+            color: #4b0082;
+            margin-bottom: 10px;
+            font-size: 24px;
         }
-
-        .number-select {
-            background: rgba(255, 255, 255, 0.98);
-            border-radius: 1rem;
-            padding: 1.5rem;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            margin: 2rem 0;
-            border: 1px solid rgba(255, 255, 255, 0.4);
+        
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 20px;
+            }
         }
-
-        button {
-            padding: 0.75rem 1.5rem;
-            margin: 0.5rem;
-            font-size: 1rem;
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            border-radius: 0.75rem;
-            background: var(--primary-color);
+        
+        /* Hoşgeldin Modalı */
+        #welcomeModal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+        
+        #welcomeModal .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        /* Teşvik Mesajı Animasyonu */
+        .feedback-animation {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255,255,255,0.9);
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 24px;
+            z-index: 1500;
+            animation: fadeOut 3s forwards;
+        }
+        .feedback-success {
+            border: 2px solid #4CAF50;
+            color: #4CAF50;
+        }
+        .feedback-error {
+            border: 2px solid #f44336;
+            color: #f44336;
+        }
+        @keyframes fadeOut {
+            0% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+        
+        .game-modes {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .mode-btn {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 8px;
+            background-color: #9370db;
             color: white;
+            font-size: 14px;
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 4px 6px -1px rgba(139, 92, 246, 0.3);
+            transition: transform 0.2s, background-color 0.2s;
+            touch-action: manipulation;
+            -webkit-appearance: none;
         }
-
-        button:hover {
-            transform: translateY(-2px);
-            background: var(--secondary-color);
-            box-shadow: 0 10px 15px -3px rgba(6, 214, 160, 0.3);
+        
+        .mode-btn:hover, .mode-btn:active {
+            transform: scale(1.05);
+            background-color: #8a2be2;
         }
-
+        
+        .mode-btn.active {
+            background-color: #4b0082;
+            transform: scale(1.05);
+        }
+        
         .game-area {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 40px;
-            max-width: 800px;
-            margin: 20px;
-            min-height: 400px;
+            width: 100%;
         }
-
-        .balloon {
-            width: 160px;
-            height: 200px;
-            transition: all 0.3s, background 0.5s ease;
-            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
-            box-shadow: 0 25px 50px -12px rgba(139, 92, 246, 0.4);
+        
+        .question-area {
+            font-size: 24px;
+            margin: 15px 0;
+            padding: 12px;
+            background-color: #e6e6fa;
+            border-radius: 10px;
+            min-width: 180px;
+        }
+        
+        .options-area {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 15px;
+            width: 100%;
+        }
+        
+        .option-btn {
+            padding: 12px;
+            font-size: 16px;
+            min-width: 70px;
+            border: none;
+            border-radius: 8px;
+            background-color: #e6e6fa;
+            cursor: pointer;
+            transition: all 0.2s;
+            touch-action: manipulation;
+            -webkit-appearance: none;
+        }
+        
+        .option-btn:hover, .option-btn:active {
+            background-color: #d8bfd8;
+        }
+        
+        .score-area {
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background-color: #e6e6fa;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            overflow: hidden;
+        }
+        
+        .progress {
+            height: 100%;
+            background-color: #9370db;
+            border-radius: 10px;
+            transition: width 0.5s;
+        }
+        
+        .timer {
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        
+        .message {
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 10px;
+            font-size: 16px;
+            width: 100%;
+        }
+        
+        .message.success {
+            background-color: #dff0d8;
+            color: #3c763d;
+        }
+        
+        .message.error {
+            background-color: #f2dede;
+            color: #a94442;
+        }
+        
+        .medal {
+            font-size: 36px;
+            margin: 10px;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        /* Tablo Keşfi Yeni Tasarım */
+        .table-explorer-container {
+            width: 100%;
+            margin-top: 10px;
+        }
+        
+        .table-selector {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .table-number {
+            width: 40px;
+            height: 40px;
             display: flex;
             align-items: center;
             justify-content: center;
+            background-color: #e6e6fa;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .table-number:hover, .table-number:active {
+            background-color: #d8bfd8;
+        }
+        
+        .table-number.active {
+            background-color: #9370db;
             color: white;
-            font-size: 1.5rem;
-            font-weight: 600;
-            position: relative;
         }
-
-        .balloon::after {
-            content: '';
-            position: absolute;
-            bottom: -10px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 4px;
-            height: 12px;
-            background: #ff758c;
-        }
-
-        .options {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 1.5rem;
+        
+        .selected-table {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 10px;
             width: 100%;
-            max-width: 600px;
-            margin-top: 2rem;
         }
-
-        .option {
-            padding: 1.5rem;
-            font-size: 1.25rem;
-            background: rgba(255, 255, 255, 0.95) !important;
-            border-radius: 1rem;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s;
-            cursor: pointer;
-            border: 2px solid var(--primary-color);
-            font-weight: 500;
-            color: #2D3748;
+        
+        .table-row {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 300px;
+            margin-bottom: 5px;
+            padding: 8px;
+            background-color: #f5f5f5;
+            border-radius: 8px;
+            font-size: 16px;
         }
-
-        .option:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-            border-color: var(--primary-color);
+        
+        .table-row:nth-child(even) {
+            background-color: #e6e6fa;
         }
-
-        .option.correct {
-            background: linear-gradient(135deg, #06D6A0, #059669) !important;
-            color: white;
-            box-shadow: 0 10px 15px -3px rgba(6, 214, 160, 0.3);
+        
+        .table-result {
+            font-weight: bold;
         }
-
-        .option.wrong {
-            background: linear-gradient(135deg, #FF6B6B, #EF4444) !important;
-            color: white;
-            box-shadow: 0 10px 15px -3px rgba(255, 107, 107, 0.3);
+        
+        .table-title {
+            font-size: 20px;
+            margin-bottom: 15px;
+            color: #4b0082;
         }
-
-        .score {
-            font-size: 1.5rem;
-            color: #1e293b;
-            font-weight: 600;
-            background: rgba(255, 255, 255, 0.95);
-            padding: 0.75rem 2rem;
-            border-radius: 2rem;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            border: 2px solid var(--secondary-color);
+        
+        /* Confetti Animation */
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background-color: #f00;
+            border-radius: 50%;
+            animation: fall 5s linear;
+            z-index: 1000;
         }
-
-        /* Home butonu stil düzenlemesi */
-        .home-button {
-            padding: 0.75rem 1.5rem;
-            font-size: 1rem;
-            border: none;
-            border-radius: 0.75rem;
-            background: var(--accent-color);
-            color: white;
-            cursor: pointer;
-            box-shadow: 0 4px 6px -1px rgba(255, 193, 102, 0.3);
-            transition: all 0.3s;
-        }
-        .home-button:hover {
-            transform: translateY(-2px);
-            background: #FFC107;
-        }
-
-        @media (max-width: 768px) {
-            h1 {
-                font-size: 1.75rem;
-                padding: 0 1rem;
+        
+        @keyframes fall {
+            0% {
+                transform: translateY(-100vh) rotate(0deg);
+                opacity: 1;
             }
-            
-            .number-select {
-                margin: 1rem 0;
-                padding: 1rem;
-            }
-            
-            button {
-                padding: 0.8rem 1.2rem;
-                font-size: 0.9rem;
-                margin: 0.3rem;
-            }
-            
-            .balloon {
-                width: 120px;
-                height: 150px;
-                font-size: 1.2rem;
-            }
-            
-            .options {
-                gap: 1rem;
-                padding: 0 1rem;
-            }
-            
-            .option {
-                padding: 1.2rem;
-                font-size: 1.1rem;
-            }
-        }
-
-        @media (max-width: 380px) and (orientation: portrait) {
-            h1 {
-                font-size: 1.5rem;
-            }
-            
-            .score {
-                font-size: 1.2rem;
-                padding: 0.5rem 1.5rem;
-            }
-            
-            .option {
-                padding: 1rem;
-                font-size: 1rem;
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
             }
         }
         
+        /* Safari için özel düzenlemeler */
         @supports (-webkit-touch-callout: none) {
-            .balloon {
-                -webkit-transform: translateZ(0);
+            .mode-btn, .option-btn {
+                padding-left: 8px;
+                padding-right: 8px;
             }
-            .option {
-                -webkit-overflow-scrolling: touch;
+            
+            input[type="number"] {
+                font-size: 16px;
             }
+        }
+        
+        /* Müzik Kontrolleri */
+        .audio-controls {
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .audio-btn {
+            padding: 8px;
+            border: none;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            background-color: #9370db;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .volume-slider {
+            width: 100px;
+            margin: 0 10px;
         }
     </style>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
-    <audio id="correctSound" src="data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU7V7A=="></audio>
-    <audio id="wrongSound" src="data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU7V7A=="></audio>
-    <audio id="backgroundMusic" loop>
-        <source src="bg-music.mp3" type="audio/mpeg">
-        Tarayıcınız audio elementini desteklemiyor.
-    </audio>
 </head>
 <body>
-    <div class="container">
-        <h1>🎈 Balon Patlatma - Çarpım Tablosu 🎈 
-            <button id="musicToggle" onclick="toggleMusic()" style="font-size: 0.6em; vertical-align: middle;">🔊</button>
-        </h1>
-        
-        <div class="number-select">
-            <p>Çalışmak istediğin sayıyı seç:</p>
-            <button onclick="startGame(1)">1</button>
-            <button onclick="startGame(2)">2</button>
-            <button onclick="startGame(3)">3</button>
-            <button onclick="startGame(4)">4</button>
-            <button onclick="startGame(5)">5</button>
-            <button onclick="startGame(6)">6</button>
-            <button onclick="startGame(7)">7</button>
-            <button onclick="startGame(8)">8</button>
-            <button onclick="startGame(9)">9</button>
-            <button onclick="startGame(10)">10</button>
+    <!-- Hoşgeldin Modalı -->
+    <div id="welcomeModal">
+        <div class="modal-content">
+            <h2>Hoşgeldiniz!</h2>
+            <p>Lütfen isminizi girin:</p>
+            <input type="text" id="playerNameInput" placeholder="İsminiz" style="padding: 8px; font-size: 16px; margin-bottom: 10px;">
+            <br>
+            <button id="startGameBtn" class="mode-btn" style="padding: 8px 12px;">Başla</button>
         </div>
-
-        <div class="score">Puan: <span id="score">0</span></div>
-        <div id="gameArea" class="game-area"></div>
-        <div id="homeDiv" style="display: none; margin-top: 20px;">
-            <button class="home-button" onclick="goHome()">🏠 Ana Sayfaya Dön</button>
+    </div>
+    
+    <div class="container">
+        <h1>Çarpım Tablosu Oyunu</h1>
+        <!-- Oyuncu adı girildikten sonra burada selamlaşma yazısı gösterilecek -->
+        <p id="greeting" style="font-size: 18px; color: #4b0082;"></p>
+        <p>Çarpım tablosunu eğlenerek öğrenmeye hazır mısın?</p>
+        
+        <div class="audio-controls">
+            <button id="toggleMusic" class="audio-btn">🔊</button>
+            <input type="range" min="0" max="1" step="0.1" value="0.5" class="volume-slider" id="volumeControl">
+        </div>
+        
+        <div class="game-modes">
+            <button class="mode-btn active" data-mode="practice">Alıştırma</button>
+            <button class="mode-btn" data-mode="challenge">Meydan Okuma</button>
+            <button class="mode-btn" data-mode="time-attack">Zamana Karşı</button>
+            <button class="mode-btn" data-mode="table-explorer">Tablo Keşfi</button>
+        </div>
+        
+        <div id="practiceMode" class="game-area">
+            <div class="question-area">
+                <span id="num1">5</span> × <span id="num2">7</span> = ?
+            </div>
+            
+            <div class="options-area" id="options">
+                <!-- Seçenekler JavaScript ile doldurulacak -->
+            </div>
+            
+            <div class="score-area">
+                Doğru: <span id="correctScore">0</span> | Yanlış: <span id="incorrectScore">0</span>
+            </div>
+            
+            <div class="message" id="message"></div>
+            
+            <button id="nextQuestion" class="mode-btn">Sonraki Soru</button>
+        </div>
+        
+        <div id="challengeMode" class="game-area hidden">
+            <div class="progress-bar">
+                <div class="progress" id="challengeProgress"></div>
+            </div>
+            
+            <div class="question-area">
+                <span id="challengeNum1">3</span> × <span id="challengeNum2">6</span> = ?
+            </div>
+            
+            <input type="number" id="challengeAnswer" placeholder="Cevabını gir" style="padding: 10px; font-size: 16px; border-radius: 8px; border: 2px solid #9370db; margin-bottom: 15px; width: 100%; max-width: 200px;">
+            
+            <button id="submitAnswer" class="mode-btn">Cevapla</button>
+            
+            <div class="score-area">
+                İlerleme: <span id="challengeScore">0</span>/10
+            </div>
+            
+            <div class="message" id="challengeMessage"></div>
+        </div>
+        
+        <div id="timeAttackMode" class="game-area hidden">
+            <div class="timer">
+                Kalan Süre: <span id="timeLeft">60</span> saniye
+            </div>
+            
+            <div class="question-area">
+                <span id="timeAttackNum1">4</span> × <span id="timeAttackNum2">8</span> = ?
+            </div>
+            
+            <div class="options-area" id="timeAttackOptions">
+                <!-- Seçenekler JavaScript ile doldurulacak -->
+            </div>
+            
+            <div class="score-area">
+                Puan: <span id="timeAttackScore">0</span>
+            </div>
+            
+            <button id="startTimeAttack" class="mode-btn">Başla!</button>
+        </div>
+        
+        <!-- Yeniden Tasarlanmış Tablo Keşfi Modu -->
+        <div id="tableExplorerMode" class="game-area hidden">
+            <div class="table-explorer-container">
+                <h3 class="table-title">Öğrenmek istediğin çarpım tablosunu seç:</h3>
+                
+                <div class="table-selector" id="tableSelector">
+                    <!-- 1'den 10'a kadar sayılar JavaScript ile doldurulacak -->
+                </div>
+                
+                <div class="selected-table" id="selectedTable">
+                    <!-- Seçilen tablo JavaScript ile doldurulacak -->
+                </div>
+                
+                <div class="message" id="tableMessage"></div>
+            </div>
         </div>
     </div>
 
+    <!-- Ses efektleri -->
+    <audio id="correctSound" preload="auto">
+        <source src="correct.mp3" type="audio/mpeg">
+    </audio>
+    
+    <audio id="incorrectSound" preload="auto">
+        <source src="incorrect.mp3" type="audio/mpeg">
+    </audio>
+    
+    <!-- Arkaplan müziği -->
+    <audio id="backgroundMusic" loop>
+        <source src="background.mp3" type="audio/mpeg">
+    </audio>
+
     <script>
-        let score = 0;
-        let currentNumber;
-
-        // Müzik kontrolü için değişken
+        // Global değişkenler
+        let currentMode = 'practice';
+        let correctAnswers = 0;
+        let incorrectAnswers = 0;
+        let challengeProgress = 0;
+        let timeAttackScore = 0;
+        let timeLeft = 60;
+        let timer;
+        let currentNum1, currentNum2, correctAnswer;
+        let selectedTable = 1;
         let isMusicPlaying = false;
+        let playerName = "";
+        
+        // Ses efektleri ve müzik
+        const correctSound = document.getElementById('correctSound');
+        const incorrectSound = document.getElementById('incorrectSound');
         const backgroundMusic = document.getElementById('backgroundMusic');
-
-        function toggleMusic() {
-            isMusicPlaying = !isMusicPlaying;
-            const musicButton = document.getElementById('musicToggle');
-            
-            if(isMusicPlaying) {
-                backgroundMusic.play();
-                musicButton.innerHTML = '🔊';
-            } else {
+        const toggleMusicBtn = document.getElementById('toggleMusic');
+        const volumeControl = document.getElementById('volumeControl');
+        
+        // Müzik kontrolü
+        toggleMusicBtn.addEventListener('click', () => {
+            if (isMusicPlaying) {
                 backgroundMusic.pause();
-                musicButton.innerHTML = '🔇';
+                toggleMusicBtn.textContent = '🔊';
+            } else {
+                backgroundMusic.play().catch(error => {
+                    console.log('Müzik otomatik başlatılamadı:', error);
+                });
+                toggleMusicBtn.textContent = '🔇';
             }
-        }
-
-        // Rastgele renk üretme fonksiyonu
-        function randomColor() {
-            const hue = Math.floor(Math.random() * 360);
-            return `hsl(${hue}deg, 80%, 60%)`;
-        }
-
-        // Ses efektleri için Web Audio API
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-
-        function playCorrectSound() {
-            const oscillator = audioContext.createOscillator();
-            const gainNode = audioContext.createGain();
-            
-            oscillator.type = 'triangle';
-            oscillator.frequency.setValueAtTime(880, audioContext.currentTime);
-            gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
-            
-            oscillator.connect(gainNode);
-            gainNode.connect(audioContext.destination);
-            
-            oscillator.start();
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
-            oscillator.stop(audioContext.currentTime + 0.5);
-        }
-
-        function playWrongSound() {
-            const oscillator = audioContext.createOscillator();
-            const gainNode = audioContext.createGain();
-            
-            oscillator.type = 'square';
-            oscillator.frequency.setValueAtTime(220, audioContext.currentTime);
-            gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
-            
-            oscillator.connect(gainNode);
-            gainNode.connect(audioContext.destination);
-            
-            oscillator.start();
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
-            oscillator.stop(audioContext.currentTime + 0.3);
-        }
-
-        // Sayfa yüklendiğinde müzik ayarlarını yap
-        document.addEventListener('DOMContentLoaded', function() {
-            // Kullanıcı etkileşimi sonrası müziği başlat
-            const startHandler = () => {
-                if(!isMusicPlaying) {
-                    backgroundMusic.play().catch(() => {});
-                    document.removeEventListener('click', startHandler);
-                    document.removeEventListener('touchstart', startHandler);
-                }
-            };
-
-            // İlk tıklamada müziği etkinleştir
-            document.addEventListener('click', startHandler);
-            document.addEventListener('touchstart', startHandler);
-
-            // Müzik ayarlarını yapılandır
-            backgroundMusic.volume = 0.3; // Ses seviyesi %30
-            backgroundMusic.loop = true;
+            isMusicPlaying = !isMusicPlaying;
         });
-
-        // Oyun butonlarını güncelle (müzikle senkronize et)
-        function startGame(num) {
-            currentNumber = num;
-            score = 0;
-            document.getElementById('score').textContent = score;
+        
+        // Ses seviyesi kontrolü
+        volumeControl.addEventListener('input', () => {
+            backgroundMusic.volume = volumeControl.value;
+            correctSound.volume = volumeControl.value;
+            incorrectSound.volume = volumeControl.value;
+        });
+        
+        // iOS için ilk etkileşimde müzik başlatma
+        document.addEventListener('touchstart', function() {
+            document.removeEventListener('touchstart', arguments.callee);
+            correctSound.load();
+            incorrectSound.load();
+            backgroundMusic.load();
+        }, false);
+        
+        // Sayfa yüklendiğinde müziği hazırla ve otomatik başlatmaya çalış
+        window.addEventListener('load', function() {
+            backgroundMusic.load();
+            correctSound.load();
+            incorrectSound.load();
             
-            // Müzik çalmıyorsa başlat
-            if(!isMusicPlaying) {
-                backgroundMusic.play();
+            backgroundMusic.volume = volumeControl.value;
+            correctSound.volume = volumeControl.value;
+            incorrectSound.volume = volumeControl.value;
+            
+            backgroundMusic.play().then(() => {
                 isMusicPlaying = true;
-                document.getElementById('musicToggle').innerHTML = '🔊';
+                toggleMusicBtn.textContent = '🔇';
+            }).catch(error => {
+                console.log("Auto-play başarısız:", error);
+            });
+        });
+        
+        // Hoşgeldin modalı işlemleri
+        document.getElementById('startGameBtn').addEventListener('click', () => {
+            const input = document.getElementById('playerNameInput').value.trim();
+            if (input !== "") {
+                playerName = input;
+                document.getElementById('greeting').textContent = "Merhaba, " + playerName + "!";
+                document.getElementById('welcomeModal').style.display = "none";
+                // Hoşgeldin modalı kapandıktan sonra hemen alıştırma modundaki soruyu oluştur
+                generatePracticeQuestion();
+            } else {
+                alert("Lütfen isminizi girin!");
             }
-            
-            createQuestion();
-            document.getElementById('homeDiv').style.display = "block";
+        });
+        
+        // Rastgele geri dönüş mesajlarını döndüren fonksiyonlar
+        function getRandomCorrectFeedback() {
+            const messages = [
+                `${playerName}, harikasın!`,
+                `${playerName}, sen bu işi biliyorsun!`,
+                `${playerName}, mükemmelsin!`,
+                `${playerName}, doğru cevapla ilerliyorsun!`,
+                `${playerName}, başarı seninle!`
+            ];
+            return messages[Math.floor(Math.random() * messages.length)];
         }
-
-        function createQuestion() {
-            const gameArea = document.getElementById('gameArea');
-            gameArea.innerHTML = '';
-
-            const i = Math.floor(Math.random() * 10) + 1;
-            const correctAnswer = currentNumber * i;
-
-            // Balon içinde soru
-            const balloon = document.createElement('div');
-            balloon.className = 'balloon';
-            balloon.innerHTML = `${currentNumber} × ${i} = ?`;
+        
+        function getRandomIncorrectFeedback() {
+            const messages = [
+                `${playerName}, tekrar dene!`,
+                `${playerName}, daha iyisini yapabilirsin!`,
+                `${playerName}, pes etme, tekrar dene!`,
+                `${playerName}, yanlış cevap, şansını dene!`,
+                `${playerName}, endişelenme, bir dahaki sefer daha iyi olacak!`
+            ];
+            return messages[Math.floor(Math.random() * messages.length)];
+        }
+        
+        // Teşvik mesajı animasyonunu gösterme fonksiyonu (3 saniye görünme süresi)
+        function showFeedbackAnimation(text, type) {
+            const feedbackDiv = document.createElement('div');
+            feedbackDiv.className = 'feedback-animation ' + (type === 'success' ? 'feedback-success' : 'feedback-error');
+            feedbackDiv.textContent = text;
+            document.body.appendChild(feedbackDiv);
+            setTimeout(() => {
+                feedbackDiv.remove();
+            }, 3000);
+        }
+        
+        // DOM elementleri
+        const modeButtons = document.querySelectorAll('.mode-btn[data-mode]');
+        const gameAreas = document.querySelectorAll('.game-area');
+        const practiceMode = document.getElementById('practiceMode');
+        const challengeMode = document.getElementById('challengeMode');
+        const timeAttackMode = document.getElementById('timeAttackMode');
+        const tableExplorerMode = document.getElementById('tableExplorerMode');
+        
+        // Mod değiştirme fonksiyonu
+        function changeMode(mode) {
+            currentMode = mode;
+            modeButtons.forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`.mode-btn[data-mode="${mode}"]`).classList.add('active');
+            gameAreas.forEach(area => area.classList.add('hidden'));
             
-            // Rastgele balon rengi
-            const color1 = randomColor();
-            const color2 = randomColor();
-            balloon.style.background = `radial-gradient(circle at 30% 30%, ${color1}, ${color2})`;
-            balloon.style.boxShadow = `0 25px 50px -12px ${color1}66`;
-            gameArea.appendChild(balloon);
-
-            // Cevap seçenekleri
-            const options = document.createElement('div');
-            options.className = 'options';
-
-            // Doğru cevap ve 3 yanlış cevap oluştur
-            const answers = [correctAnswer];
-            while (answers.length < 4) {
-                const wrongAnswer = correctAnswer + Math.floor(Math.random() * 10) - 5;
-                if (wrongAnswer !== correctAnswer && !answers.includes(wrongAnswer) && wrongAnswer > 0) {
-                    answers.push(wrongAnswer);
+            switch(mode) {
+                case 'practice':
+                    practiceMode.classList.remove('hidden');
+                    generatePracticeQuestion();
+                    break;
+                case 'challenge':
+                    challengeMode.classList.remove('hidden');
+                    resetChallenge();
+                    generateChallengeQuestion();
+                    break;
+                case 'time-attack':
+                    timeAttackMode.classList.remove('hidden');
+                    resetTimeAttack();
+                    break;
+                case 'table-explorer':
+                    tableExplorerMode.classList.remove('hidden');
+                    createTableSelector();
+                    break;
+            }
+        }
+        
+        modeButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (currentMode === 'time-attack' && timer) {
+                    clearInterval(timer);
+                }
+                changeMode(btn.dataset.mode);
+            });
+        });
+        
+        // ---------- ALIŞTRIMA MODU ----------
+        function generatePracticeQuestion() {
+            currentNum1 = Math.floor(Math.random() * 10) + 1;
+            currentNum2 = Math.floor(Math.random() * 10) + 1;
+            correctAnswer = currentNum1 * currentNum2;
+            
+            document.getElementById('num1').textContent = currentNum1;
+            document.getElementById('num2').textContent = currentNum2;
+            
+            generateOptions(correctAnswer);
+            document.getElementById('message').className = 'message';
+            document.getElementById('message').textContent = '';
+        }
+        
+        function generateOptions(correct) {
+            const options = [correct];
+            while (options.length < 4) {
+                const num1 = Math.floor(Math.random() * 10) + 1;
+                const num2 = Math.floor(Math.random() * 10) + 1;
+                const option = num1 * num2;
+                if (!options.includes(option)) {
+                    options.push(option);
                 }
             }
-
-            // Cevapları karıştır
-            answers.sort(() => Math.random() - 0.5);
-
-            answers.forEach(answer => {
-                const option = document.createElement('div');
-                option.className = 'option';
-                option.textContent = answer;
-                option.onclick = () => checkAnswer(answer, correctAnswer, balloon);
-                options.appendChild(option);
+            shuffleArray(options);
+            const optionsContainer = document.getElementById('options');
+            optionsContainer.innerHTML = '';
+            options.forEach(option => {
+                const button = document.createElement('button');
+                button.className = 'option-btn';
+                button.textContent = option;
+                button.addEventListener('click', () => checkAnswer(option));
+                optionsContainer.appendChild(button);
             });
-
-            gameArea.appendChild(options);
         }
-
-        function checkAnswer(selectedAnswer, correctAnswer, balloon) {
-            const options = document.querySelectorAll('.option');
+        
+        function checkAnswer(answer) {
+            const messageElement = document.getElementById('message');
+            if (answer === correctAnswer) {
+                messageElement.textContent = 'Doğru! 🎉';
+                messageElement.className = 'message success';
+                correctAnswers++;
+                document.getElementById('correctScore').textContent = correctAnswers;
+                createConfetti(10);
+                correctSound.currentTime = 0;
+                correctSound.play().catch(e => console.log('Ses çalınamadı:', e));
+                showFeedbackAnimation(getRandomCorrectFeedback(), "success");
+            } else {
+                messageElement.textContent = `Yanlış! Doğru cevap: ${correctAnswer}`;
+                messageElement.className = 'message error';
+                incorrectAnswers++;
+                document.getElementById('incorrectScore').textContent = incorrectAnswers;
+                incorrectSound.currentTime = 0;
+                incorrectSound.play().catch(e => console.log('Ses çalınamadı:', e));
+                showFeedbackAnimation(getRandomIncorrectFeedback(), "error");
+            }
+            const options = document.querySelectorAll('.option-btn');
+            options.forEach(option => {
+                option.disabled = true;
+                if (parseInt(option.textContent) === correctAnswer) {
+                    option.style.backgroundColor = '#90ee90';
+                } else if (parseInt(option.textContent) === answer && answer !== correctAnswer) {
+                    option.style.backgroundColor = '#ffcccb';
+                }
+            });
+        }
+        
+        document.getElementById('nextQuestion').addEventListener('click', () => {
+            generatePracticeQuestion();
+        });
+        
+        // ---------- MEYDAN OKUMA MODU ----------
+        function resetChallenge() {
+            challengeProgress = 0;
+            document.getElementById('challengeScore').textContent = challengeProgress;
+            document.getElementById('challengeProgress').style.width = '0%';
+            document.getElementById('challengeMessage').className = 'message';
+            document.getElementById('challengeMessage').textContent = '';
+        }
+        
+        function generateChallengeQuestion() {
+            currentNum1 = Math.floor(Math.random() * 10) + 1;
+            currentNum2 = Math.floor(Math.random() * 10) + 1;
+            correctAnswer = currentNum1 * currentNum2;
+            
+            document.getElementById('challengeNum1').textContent = currentNum1;
+            document.getElementById('challengeNum2').textContent = currentNum2;
+            document.getElementById('challengeAnswer').value = '';
+            
+            setTimeout(() => {
+                const input = document.getElementById('challengeAnswer');
+                input.focus();
+                input.blur();
+            }, 100);
+        }
+        
+        document.getElementById('submitAnswer').addEventListener('click', () => {
+            checkChallengeAnswer();
+        });
+        
+        document.getElementById('challengeAnswer').addEventListener('keyup', (event) => {
+            if (event.key === 'Enter') {
+                checkChallengeAnswer();
+            }
+        });
+        
+        function checkChallengeAnswer() {
+            const userAnswer = parseInt(document.getElementById('challengeAnswer').value);
+            const messageElement = document.getElementById('challengeMessage');
+            
+            if (isNaN(userAnswer)) {
+                messageElement.textContent = 'Lütfen bir sayı girin!';
+                messageElement.className = 'message error';
+                return;
+            }
+            
+            if (userAnswer === correctAnswer) {
+                messageElement.textContent = 'Doğru! 🎉';
+                messageElement.className = 'message success';
+                challengeProgress++;
+                createConfetti(10);
+                correctSound.currentTime = 0;
+                correctSound.play().catch(e => console.log('Ses çalınamadı:', e));
+                showFeedbackAnimation(getRandomCorrectFeedback(), "success");
+            } else {
+                messageElement.textContent = `Yanlış! Doğru cevap: ${correctAnswer}`;
+                messageElement.className = 'message error';
+                incorrectSound.currentTime = 0;
+                incorrectSound.play().catch(e => console.log('Ses çalınamadı:', e));
+                showFeedbackAnimation(getRandomIncorrectFeedback(), "error");
+            }
+            
+            document.getElementById('challengeScore').textContent = challengeProgress;
+            const progressPercentage = (challengeProgress / 10) * 100;
+            document.getElementById('challengeProgress').style.width = `${progressPercentage}%`;
+            
+            if (challengeProgress >= 10) {
+                completeChallenge();
+            } else {
+                setTimeout(generateChallengeQuestion, 1500);
+            }
+        }
+        
+        function completeChallenge() {
+            const messageElement = document.getElementById('challengeMessage');
+            messageElement.innerHTML = `
+                <div style="text-align: center">
+                    <h2>Tebrikler! Meydan okumayı tamamladın!</h2>
+                    <div class="medal">🏆</div>
+                    <button id="restartChallenge" class="mode-btn">Yeniden Başla</button>
+                </div>
+            `;
+            createConfetti(100);
+            
+            document.getElementById('restartChallenge').addEventListener('click', () => {
+                resetChallenge();
+                generateChallengeQuestion();
+            });
+        }
+        
+        // ---------- ZAMANA KARŞI MODU ----------
+        function resetTimeAttack() {
+            timeAttackScore = 0;
+            timeLeft = 60;
+            document.getElementById('timeAttackScore').textContent = timeAttackScore;
+            document.getElementById('timeLeft').textContent = timeLeft;
+            document.getElementById('startTimeAttack').textContent = 'Başla!';
+            document.getElementById('startTimeAttack').style.display = 'block';
+            document.getElementById('timeAttackOptions').innerHTML = '';
+            
+            if (timer) {
+                clearInterval(timer);
+                timer = null;
+            }
+        }
+        
+        document.getElementById('startTimeAttack').addEventListener('click', () => {
+            document.getElementById('startTimeAttack').style.display = 'none';
+            startTimeAttack();
+        });
+        
+        function startTimeAttack() {
+            resetTimeAttack();
+            generateTimeAttackQuestion();
+            
+            timer = setInterval(() => {
+                timeLeft--;
+                document.getElementById('timeLeft').textContent = timeLeft;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    endTimeAttack();
+                }
+            }, 1000);
+        }
+        
+        function generateTimeAttackQuestion() {
+            currentNum1 = Math.floor(Math.random() * 10) + 1;
+            currentNum2 = Math.floor(Math.random() * 10) + 1;
+            correctAnswer = currentNum1 * currentNum2;
+            
+            document.getElementById('timeAttackNum1').textContent = currentNum1;
+            document.getElementById('timeAttackNum2').textContent = currentNum2;
+            
+            const optionsContainer = document.getElementById('timeAttackOptions');
+            optionsContainer.innerHTML = '';
+            
+            const options = [correctAnswer];
+            while (options.length < 4) {
+                const num1 = Math.floor(Math.random() * 10) + 1;
+                const num2 = Math.floor(Math.random() * 10) + 1;
+                const option = num1 * num2;
+                if (!options.includes(option)) {
+                    options.push(option);
+                }
+            }
+            
+            shuffleArray(options);
             
             options.forEach(option => {
-                const answer = parseInt(option.textContent);
-                if (answer === correctAnswer) {
-                    option.classList.add('correct');
-                } else if (answer === selectedAnswer) {
-                    option.classList.add('wrong');
-                }
-                
-                option.style.pointerEvents = 'none'; // Tekrar tıklanmasını engelle
+                const button = document.createElement('button');
+                button.className = 'option-btn';
+                button.textContent = option;
+                button.addEventListener('click', () => checkTimeAttackAnswer(option));
+                optionsContainer.appendChild(button);
             });
-
-            if (selectedAnswer === correctAnswer) {
-                score += 10;
-                document.getElementById('score').textContent = score;
-                
-                balloon.classList.add('pop');
-                createConfetti();
-                playCorrectSound();
-                
-                setTimeout(() => {
-                    options.forEach(option => {
-                        option.classList.remove('correct', 'wrong');
-                        option.style.pointerEvents = 'auto';
-                    });
-                    createQuestion();
-                }, 1000);
-            } else {
-                balloon.style.backgroundColor = '#ff4444';
-                playWrongSound();
-                
-                setTimeout(() => {
-                    options.forEach(option => {
-                        option.classList.remove('correct', 'wrong');
-                        option.style.pointerEvents = 'auto';
-                    });
-                    balloon.style.backgroundColor = '';
-                }, 1500);
-            }
         }
-
-        function createConfetti() {
-            for (let i = 0; i < 30; i++) {
-                const confetti = document.createElement('div');
-                confetti.style.position = 'fixed';
-                confetti.style.width = '10px';
-                confetti.style.height = '10px';
-                confetti.style.backgroundColor = `hsl(${Math.random() * 360}deg, 100%, 50%)`;
-                confetti.style.left = Math.random() * 100 + 'vw';
-                confetti.style.top = '-10px';
-                confetti.style.borderRadius = '50%';
-                confetti.style.animation = `fall ${Math.random() * 2 + 1}s linear`;
-                document.body.appendChild(confetti);
-
-                setTimeout(() => confetti.remove(), 2000);
-            }
-        }
-
-        // Ana sayfaya dönüş fonksiyonu
-        function goHome() {
-            document.getElementById('gameArea').innerHTML = "";
-            document.getElementById('homeDiv').style.display = "none";
-            score = 0;
-            document.getElementById('score').textContent = score;
-        }
-
-        // Konfeti animasyonu için CSS
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes fall {
-                to {
-                    transform: translateY(100vh) rotate(360deg);
+        
+        function checkTimeAttackAnswer(answer) {
+            if (answer === correctAnswer) {
+                timeAttackScore += 10;
+                if (timeLeft < 55) {
+                    timeLeft += 2;
                 }
+                createConfetti(5);
+                correctSound.currentTime = 0;
+                correctSound.play().catch(e => console.log('Ses çalınamadı:', e));
+                showFeedbackAnimation(getRandomCorrectFeedback(), "success");
+            } else {
+                timeLeft -= 3;
+                if (timeLeft < 0) timeLeft = 0;
+                incorrectSound.currentTime = 0;
+                incorrectSound.play().catch(e => console.log('Ses çalınamadı:', e));
+                showFeedbackAnimation(getRandomIncorrectFeedback(), "error");
             }
-        `;
-        document.head.appendChild(style);
+            
+            document.getElementById('timeAttackScore').textContent = timeAttackScore;
+            document.getElementById('timeLeft').textContent = timeLeft;
+            
+            if (timeLeft <= 0) {
+                endTimeAttack();
+            } else {
+                generateTimeAttackQuestion();
+            }
+        }
+        
+        function endTimeAttack() {
+            clearInterval(timer);
+            
+            const optionsContainer = document.getElementById('timeAttackOptions');
+            optionsContainer.innerHTML = `
+                <div style="text-align: center; padding: 20px;">
+                    <h2>Süre Doldu!</h2>
+                    <p>Toplam Puanın: ${timeAttackScore}</p>
+                    <div class="medal">🎮</div>
+                    <button id="restartTimeAttack" class="mode-btn">Tekrar Oyna</button>
+                </div>
+            `;
+            
+            document.getElementById('restartTimeAttack').addEventListener('click', startTimeAttack);
+        }
+        
+        // ---------- YENİ TABLO KEŞFİ MODU ----------
+        function createTableSelector() {
+            const tableSelector = document.getElementById('tableSelector');
+            tableSelector.innerHTML = '';
+            for (let i = 1; i <= 10; i++) {
+                const btn = document.createElement('div');
+                btn.className = 'table-number';
+                btn.textContent = i;
+                btn.addEventListener('click', function() {
+                    selectedTable = i;
+                    const allNumbers = document.querySelectorAll('.table-number');
+                    allNumbers.forEach(num => num.classList.remove('active'));
+                    btn.classList.add('active');
+                    showMultiplicationTable(i);
+                });
+                tableSelector.appendChild(btn);
+            }
+            selectedTable = 1;
+            if (tableSelector.firstChild) {
+                tableSelector.firstChild.classList.add('active');
+            }
+            showMultiplicationTable(selectedTable);
+        }
+        
+        function showMultiplicationTable(tableNum) {
+            const selectedTableDiv = document.getElementById('selectedTable');
+            selectedTableDiv.innerHTML = '';
+            for (let i = 1; i <= 10; i++) {
+                const row = document.createElement('div');
+                row.className = 'table-row';
+                row.innerHTML = `<span>${i} x ${tableNum}</span><span class="table-result">${i * tableNum}</span>`;
+                selectedTableDiv.appendChild(row);
+            }
+        }
+        
+        // Yardımcı: Rastgele karıştırma fonksiyonu
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+        
+        // Yardımcı: Konfeti efekti oluşturma
+        function createConfetti(count) {
+            for (let i = 0; i < count; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * 100 + 'vw';
+                confetti.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 50%)`;
+                document.body.appendChild(confetti);
+                setTimeout(() => {
+                    confetti.remove();
+                }, 5000);
+            }
+        }
     </script>
 </body>
 </html>
